@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"flag"
 	"log"
 	"time"
@@ -58,22 +57,21 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		summary, behaviors, trend, err := jenkinsallure.CaptureAllureResult(allureURL, _job.JobName)
+		summary, behaviors, err := jenkinsallure.ObtainAllureResult(allureURL, _job.JobName)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
 		report := jenkinsallure.JenkinsAllureReport{
-			JobName:                       _job.JobName,
-			JobReceivers:                  _job.EmailReceivers,
-			LastBuildNumber:               last.GetBuildNumber(),
-			LastBuildDuration:             last.GetDuration(),
-			LastBuildResult:               last.GetResult(),
-			LastBuildColor:                detail.Color,
-			LastAllureReportURL:           allureURL,
-			LastAllureSummaryScreenshot:   base64.StdEncoding.EncodeToString(summary),
-			LastAllureBehaviorsScreenshot: base64.StdEncoding.EncodeToString(behaviors),
-			LastAllureTrendScreenshot:     base64.StdEncoding.EncodeToString(trend),
+			JobName:             _job.JobName,
+			JobReceivers:        _job.EmailReceivers,
+			LastBuildNumber:     last.GetBuildNumber(),
+			LastBuildDuration:   last.GetDuration(),
+			LastBuildResult:     last.GetResult(),
+			LastBuildColor:      detail.Color,
+			LastAllureReportURL: allureURL,
+			LastAllureSummary:   summary,
+			LastAllureBehaviors: behaviors,
 		}
 		err = report.Report(config.Email)
 		if err != nil {

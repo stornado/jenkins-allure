@@ -1,19 +1,30 @@
 FROM golang:1.15.6-alpine3.12 as builder
 
-WORKDIR /app
+WORKDIR /src
 COPY . .
 
-RUN go build -o /app/build/jenkinsallure /app/cmd/main.go 
+RUN go mod vendor \
+    && go build -o /src/jenkinsallure /src/cmd/main.go
 
-FROM chromedp/headless-shell:88.0.4324.87 as prod
 
-WORKDIR /app
+FROM zenika/alpine-chrome:86
 
-COPY --from=builder /app/build/jenkinsallure .
-RUN apt install dumb-init && chmod +x /app/jenkinsallure
+USER root
+RUN apk add --no-cache dumb-init \
+    tzdata \
+    busybox-suid \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone \
+    && apk del tzdata \
+    && mkdir -p /allure/etc \
+    && chown -R chrome:chrome /allure/etc
 
-VOLUME ["/config"]
+USER chrome
+WORKDIR /usr/src/app
+COPY --chown=chrome --from=builder /src/jenkinsallure ./
+RUN chmod +x /usr/src/app/jenkinsallure
+
+VOLUME [ "/allure/etc" ]
 
 ENTRYPOINT ["dumb-init", "--"]
-
-CMD ["/app/jenkinsallure", "-h"]
+CMD ["/usr/src/app/jenkinsallure", "-f", "/allure/etc/config.yml"]

@@ -371,3 +371,4 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows,vim,code,go,hugo,helm,jetbrains+all,sublimetext,node,docker
 
 config/config.yml
+build/
