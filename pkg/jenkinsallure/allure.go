@@ -11,7 +11,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func CaptureAllureResult(url, jobName string) ([]byte, []byte, []byte, error) {
+func CaptureAllureResult(url, jobName string) ([]byte, []byte, error) {
 	_ctx, _cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer _cancel()
 
@@ -21,26 +21,19 @@ func CaptureAllureResult(url, jobName string) ([]byte, []byte, []byte, error) {
 	// capture screenshot of an element
 	var summaryResult []byte
 	var behaviorsResult []byte
-	var trendResult []byte
 	summaryArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1)`
 	summaryInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1) > div.widget__body > div > div > div.widget__column.summary-widget__chart > div > svg`
 	if err := chromedp.Run(ctx, elementScreenshot(url, summaryArea, summaryInfo, &summaryResult)); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	behaviorsArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4)`
 	behaviorsInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4) > div.widget__body > div > h2 > span`
 	if err := chromedp.Run(ctx, elementScreenshot(url, behaviorsArea, behaviorsInfo, &behaviorsResult)); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	trendArea := `#content > div > div.app__content > div > div:nth-child(2) > div:nth-child(1)`
-	trendInfo := `#content > div > div.app__content > div > div:nth-child(2) > div:nth-child(1) > div.widget__body > div > div`
-	if err := chromedp.Run(ctx, elementScreenshot(url, trendArea, trendInfo, &trendResult)); err != nil {
-		return nil, nil, nil, err
-	}
-
-	return summaryResult, behaviorsResult, trendResult, nil
+	return summaryResult, behaviorsResult, nil
 }
 
 func ObtainAllureResult(url, jobName string) (string, string, error) {
@@ -87,7 +80,7 @@ func elementScreenshot(urlstr, sel, sel2 string, res *[]byte) chromedp.Tasks {
 		chromedp.ScrollIntoView(sel, chromedp.ByQuery),
 		chromedp.WaitVisible(sel, chromedp.ByQuery),
 		chromedp.WaitVisible(sel2, chromedp.ByQuery),
-		chromedp.Sleep(1 * time.Second),
+		chromedp.Sleep(3 * time.Second),
 		chromedp.Screenshot(sel, res, chromedp.NodeReady, chromedp.ByQuery),
 	}
 }
