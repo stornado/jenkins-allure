@@ -35,10 +35,10 @@ func (report JenkinsAllureReport) ToHtml() (string, error) {
 <h1>{{ .JobName }}</h1>
 <p>构建结果: <span class="{{ .LastBuildColor }}">{{ .LastBuildResult }}</span> <a href="{{ .LastAllureReportURL }}">点击查看详情: {{ .LastBuildNumber }}</a></p>
 
-<h2>ALLURE REPORT SUMMARY</h2>
+<h2><a href="{{- .LastAllureReportURL -}}#graph">ALLURE REPORT SUMMARY</a></h2>
 <a href="{{- .LastAllureReportURL -}}#graph"><img src="data:image/jpeg;base64,{{- .LastAllureSummarySnapshot -}}"/></a>
 
-<h2>FEATURES BY STORIES</h2>
+<h2><a href="{{- .LastAllureReportURL -}}#behaviors">FEATURES BY STORIES</a></h2>
 <a href="{{- .LastAllureReportURL -}}#behaviors"><img src="data:image/jpeg;base64,{{- .LastAllureBehaviorsSnapshot -}}"/></a>
 `
 

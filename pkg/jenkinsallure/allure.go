@@ -11,6 +11,14 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+const (
+	SUMMARY_AREA_SELECTOR = `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1)`
+	SUMMARY_INFO_SELECTOR = `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1) > div.widget__body > div > div > div.widget__column.summary-widget__chart > div > svg`
+
+	BEHAVIORS_AREA_SELECTOR = `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4)`
+	BEHAVIORS_INFO_SELECTOR = `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4) > div.widget__body > div > h2 > span`
+)
+
 func CaptureAllureResult(url, jobName string) ([]byte, []byte, error) {
 	_ctx, _cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 	defer _cancel()
@@ -21,15 +29,11 @@ func CaptureAllureResult(url, jobName string) ([]byte, []byte, error) {
 	// capture screenshot of an element
 	var summaryResult []byte
 	var behaviorsResult []byte
-	summaryArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1)`
-	summaryInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1) > div.widget__body > div > div > div.widget__column.summary-widget__chart > div > svg`
-	if err := chromedp.Run(ctx, elementScreenshot(url, summaryArea, summaryInfo, &summaryResult)); err != nil {
+	if err := chromedp.Run(ctx, elementScreenshot(url, SUMMARY_AREA_SELECTOR, SUMMARY_INFO_SELECTOR, &summaryResult)); err != nil {
 		return nil, nil, err
 	}
 
-	behaviorsArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4)`
-	behaviorsInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4) > div.widget__body > div > h2 > span`
-	if err := chromedp.Run(ctx, elementScreenshot(url, behaviorsArea, behaviorsInfo, &behaviorsResult)); err != nil {
+	if err := chromedp.Run(ctx, elementScreenshot(url, BEHAVIORS_AREA_SELECTOR, BEHAVIORS_INFO_SELECTOR, &behaviorsResult)); err != nil {
 		return nil, nil, err
 	}
 
@@ -46,15 +50,11 @@ func ObtainAllureResult(url, jobName string) (string, string, error) {
 	// capture screenshot of an element
 	var summaryResult string
 	var behaviorsResult string
-	summaryArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1)`
-	summaryInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(1) > div.widget__body > div > div > div.widget__column.summary-widget__chart > div > svg`
-	if err := chromedp.Run(ctx, elementHTML(url, summaryArea, summaryInfo, &summaryResult)); err != nil {
+	if err := chromedp.Run(ctx, elementHTML(url, SUMMARY_AREA_SELECTOR, SUMMARY_INFO_SELECTOR, &summaryResult)); err != nil {
 		return "", "", err
 	}
 
-	behaviorsArea := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4)`
-	behaviorsInfo := `#content > div > div.app__content > div > div:nth-child(1) > div:nth-child(4) > div.widget__body > div > h2 > span`
-	if err := chromedp.Run(ctx, elementHTML(url, behaviorsArea, behaviorsInfo, &behaviorsResult)); err != nil {
+	if err := chromedp.Run(ctx, elementHTML(url, BEHAVIORS_AREA_SELECTOR, BEHAVIORS_INFO_SELECTOR, &behaviorsResult)); err != nil {
 		return "", "", err
 	}
 
@@ -77,10 +77,13 @@ func elementScreenshot(urlstr, sel, sel2 string, res *[]byte) chromedp.Tasks {
 
 	return chromedp.Tasks{
 		chromedp.Navigate(urlstr),
+		chromedp.EmulateViewport(1920, 1280),
+		chromedp.Reload(),
+		chromedp.Sleep(1 * time.Second),
 		chromedp.ScrollIntoView(sel, chromedp.ByQuery),
 		chromedp.WaitVisible(sel, chromedp.ByQuery),
 		chromedp.WaitVisible(sel2, chromedp.ByQuery),
-		chromedp.Sleep(3 * time.Second),
+		chromedp.Sleep(10 * time.Second),
 		chromedp.Screenshot(sel, res, chromedp.NodeReady, chromedp.ByQuery),
 	}
 }
